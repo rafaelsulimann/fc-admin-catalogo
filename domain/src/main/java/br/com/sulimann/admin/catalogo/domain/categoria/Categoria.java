@@ -1,11 +1,11 @@
 package br.com.sulimann.admin.catalogo.domain.categoria;
 
 import java.time.Instant;
-import java.util.UUID;
 
-public class Categoria {
+import br.com.sulimann.admin.catalogo.domain.AgregateRoot;
 
-    private String id;
+public class Categoria extends AgregateRoot<CategoriaId>{
+
     private String nome;
     private String descricao;
     private boolean active;
@@ -14,7 +14,7 @@ public class Categoria {
     private Instant dataDelecao;
 
     private Categoria(
-            final String id,
+            final CategoriaId id,
             final String nome,
             final String descricao,
             final boolean active,
@@ -22,7 +22,7 @@ public class Categoria {
             final Instant dataUltimaAtualizacao,
             final Instant dataDelecao
     ) {
-        this.id = id;
+        super(id);
         this.nome = nome;
         this.descricao = descricao;
         this.active = active;
@@ -32,13 +32,9 @@ public class Categoria {
     }
 
     public static Categoria novaCategoria(final String nome, final String descricao, final boolean isActive) {
-        var id = UUID.randomUUID().toString().toLowerCase();
+        var id = CategoriaId.unique();
         var now = Instant.now();
         return new Categoria(id, nome, descricao, isActive, now, now, null);
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getNome() {
