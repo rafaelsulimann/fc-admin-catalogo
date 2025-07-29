@@ -1,14 +1,18 @@
 package br.com.sulimann.admin.catalogo.domain.categoria;
 
-import java.time.Instant;
-
 import br.com.sulimann.admin.catalogo.domain.AgregateRoot;
+
+import java.time.Instant;
+import java.util.Objects;
+
+import static br.com.sulimann.admin.catalogo.domain.validation.AssertUtils.isTrue;
+import static br.com.sulimann.admin.catalogo.domain.validation.AssertUtils.notNull;
 
 public class Categoria extends AgregateRoot<CategoriaId>{
 
     private String nome;
     private String descricao;
-    private boolean active;
+    private Boolean active;
     private Instant dataCriacao;
     private Instant dataUltimaAtualizacao;
     private Instant dataDelecao;
@@ -17,7 +21,7 @@ public class Categoria extends AgregateRoot<CategoriaId>{
             final CategoriaId id,
             final String nome,
             final String descricao,
-            final boolean active,
+            final Boolean active,
             final Instant dataCriacao,
             final Instant dataUltimaAtualizacao,
             final Instant dataDelecao
@@ -29,12 +33,28 @@ public class Categoria extends AgregateRoot<CategoriaId>{
         this.dataCriacao = dataCriacao;
         this.dataUltimaAtualizacao = dataUltimaAtualizacao;
         this.dataDelecao = dataDelecao;
+        this.validate();
     }
 
-    public static Categoria novaCategoria(final String nome, final String descricao, final boolean isActive) {
+    public static Categoria novaCategoria(final String nome, final String descricao, final Boolean isActive) {
         var id = CategoriaId.unique();
         var now = Instant.now();
-        return new Categoria(id, nome, descricao, isActive, now, now, null);
+        var dataDelecao = isActive != null && isActive ? null : now;
+        return new Categoria(id, nome, descricao, isActive, now, now, dataDelecao);
+    }
+
+    public void validate(){
+        notNull(this.nome, "'nome' nao pode ser nulo");
+        isTrue(this.nome.trim().length() >= 3 && this.nome.trim().length() <= 255, "'nome' deve ter entre 3 e 255 caracteres");
+        notNull(this.active, "'active' nao pode ser nulo");
+        notNull(this.dataCriacao, "'dataCriacao' nao pode ser nulo");
+        notNull(this.dataUltimaAtualizacao, "'dataUltimaAtualizacao' nao pode ser nulo");
+
+        if(isActive()){
+            isTrue(this.active && Objects.isNull(dataDelecao), "'dataDelecao' precisa ser nulo caso o usuario estiver ativo");
+        }else {
+            isTrue(Objects.nonNull(this.dataDelecao) && !this.active, "Usuario nao pode estar ativo se 'dataDelecao' nao for nulo");
+        }
     }
 
     public String getNome() {
@@ -60,4 +80,5 @@ public class Categoria extends AgregateRoot<CategoriaId>{
     public Instant getDataDelecao() {
         return dataDelecao;
     }
+
 }

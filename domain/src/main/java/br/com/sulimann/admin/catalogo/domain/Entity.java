@@ -2,7 +2,7 @@ package br.com.sulimann.admin.catalogo.domain;
 
 import java.util.Objects;
 
-public class Entity<ID extends Identifier> {
+public abstract class Entity<ID extends Identifier> {
   private final ID id;
 
   protected Entity(final ID id) {
